@@ -26,7 +26,17 @@ public class SpanningTree {
                 st.calculateRandomConnections(line);
               } else if (line.matches("[0-9]* ([0-9]*-[0-9]* )*")) {
                 System.out.println("Connections list");
-                System.out.println(st.calculateConnections(line));
+                ArrayList<Node> nodes = st.calculateConnections(line);
+                System.out.println(nodes);
+                String previous = "";
+                for (int i = 0; i < nodes.size(); i++) {
+                  st.calculateTree(nodes);
+                  if (previous.equals(nodes.toString())) {
+                    break;
+                  }
+                  System.out.println(nodes);
+                  previous = nodes.toString();
+                }
               } else {
                 System.out.println("Invalid line");
               }
@@ -73,9 +83,22 @@ public class SpanningTree {
    * @param nodes The nodes to calculate the tree for
    */
   private void calculateTree(ArrayList<Node> nodes) {
+    ArrayList<Node> temp = new ArrayList<Node>();
     for (Node node : nodes) {
+      temp.add(new Node(node.getMyself(), node.getRoot(), node.getHops(), node.getConnections()));
+    }
+    for (Node node : temp) {
       for (Node connection : node.getConnections()) {
         connection.calculateRoot(node);
+      }
+    }
+  }
+
+  private void draw (ArrayList<Node> nodes) {
+    for (Node node : nodes) {
+      System.out.println(node + "->");
+      for (Node connection: node.getConnections()) {
+        System.out.print(connection + " ");
       }
     }
   }
@@ -85,6 +108,13 @@ public class SpanningTree {
     private int myself;
     private int root;
     private int hops;
+
+    public Node (int myself, int root, int hops, ArrayList<Node> connections) {
+      this.connections = connections;
+      this.myself = myself;
+      this.root = root;
+      this.hops = hops;
+    }
 
     public Node (int myself, int root, int hops) {
       this.connections = new ArrayList<Node>();
@@ -105,6 +135,13 @@ public class SpanningTree {
      */
     public ArrayList<Node> getConnections() {
       return this.connections;
+    }
+
+    /**
+     * @return Myself for the node
+     */
+    public int getMyself() {
+      return this.myself;
     }
 
     /**
