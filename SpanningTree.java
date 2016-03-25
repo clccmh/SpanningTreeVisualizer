@@ -3,6 +3,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
+import java.lang.StringBuilder;
 
 /**
  * @Author Carter Hay 
@@ -23,20 +25,13 @@ public class SpanningTree {
               System.out.println(line);
               if (line.matches("[0-9]* R")) {
                 System.out.println("Random");
-                st.calculateRandomConnections(line);
+                ArrayList<Node> nodes = st.calculateRandomConnections(line);
+                st.findAllRoots(nodes);
               } else if (line.matches("[0-9]* ([0-9]*-[0-9]* )*")) {
                 System.out.println("Connections list");
                 ArrayList<Node> nodes = st.calculateConnections(line);
-                System.out.println(nodes);
-                String previous = "";
-                for (int i = 0; i < nodes.size(); i++) {
-                  st.calculateTree(nodes);
-                  if (previous.equals(nodes.toString())) {
-                    break;
-                  }
-                  System.out.println(nodes);
-                  previous = nodes.toString();
-                }
+                st.findAllRoots(nodes);
+                //removeDuplicateConnections(nodes)
               } else {
                 System.out.println("Invalid line");
               }
@@ -55,11 +50,38 @@ public class SpanningTree {
     }
   }
 
+  private void findAllRoots(ArrayList<Node> nodes) {
+    System.out.println(nodes);
+    String previous = "";
+    for (int i = 0; i < nodes.size(); i++) {
+      this.calculateTree(nodes);
+      if (previous.equals(nodes.toString())) {
+        break;
+      }
+      System.out.println(nodes);
+      previous = nodes.toString();
+    }
+  }
+
   /**
    * @param line The line to be calculated
    */
-  private void calculateRandomConnections (String line) {
-
+  private ArrayList<Node> calculateRandomConnections (String line) {
+    StringBuilder sb = new StringBuilder();
+    Random rand = new Random();
+    int numOfNodes = Character.getNumericValue(line.charAt(0));
+    sb.append(line.charAt(0) + " ");
+    for (int i = 1; i <= numOfNodes; i++) {
+      int con = rand.nextInt(numOfNodes)+1;
+      if (i == con && con < numOfNodes) {
+        con++;
+      } else if (con == numOfNodes) {
+        con--;
+      }
+      sb.append(i + "-" + con + " ");
+    }
+    System.out.println(sb.toString());
+    return calculateConnections(sb.toString());
   }
 
   /**
