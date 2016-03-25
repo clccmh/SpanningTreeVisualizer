@@ -24,11 +24,11 @@ public class SpanningTree {
             while ((line = br.readLine()) != null) {
               System.out.println(line);
               if (line.matches("[0-9]* R")) {
-                System.out.println("Random");
-                ArrayList<Node> nodes = st.calculateRandomConnections(line);
+                line = st.calculateRandomConnections(line);
+                System.out.println(line);
+                ArrayList<Node> nodes = st.calculateConnections(line);
                 st.findAllRoots(nodes);
               } else if (line.matches("[0-9]* ([0-9]*-[0-9]* )*")) {
-                System.out.println("Connections list");
                 ArrayList<Node> nodes = st.calculateConnections(line);
                 st.findAllRoots(nodes);
                 //removeDuplicateConnections(nodes)
@@ -51,14 +51,14 @@ public class SpanningTree {
   }
 
   private void findAllRoots(ArrayList<Node> nodes) {
-    System.out.println(nodes);
+    draw(nodes);
     String previous = "";
     for (int i = 0; i < nodes.size(); i++) {
       this.calculateTree(nodes);
       if (previous.equals(nodes.toString())) {
         break;
       }
-      System.out.println(nodes);
+      draw(nodes);
       previous = nodes.toString();
     }
   }
@@ -66,7 +66,7 @@ public class SpanningTree {
   /**
    * @param line The line to be calculated
    */
-  private ArrayList<Node> calculateRandomConnections (String line) {
+  private String calculateRandomConnections (String line) {
     StringBuilder sb = new StringBuilder();
     Random rand = new Random();
     int numOfNodes = Character.getNumericValue(line.charAt(0));
@@ -80,8 +80,7 @@ public class SpanningTree {
       }
       sb.append(i + "-" + con + " ");
     }
-    System.out.println(sb.toString());
-    return calculateConnections(sb.toString());
+    return sb.toString();
   }
 
   /**
@@ -118,11 +117,9 @@ public class SpanningTree {
 
   private void draw (ArrayList<Node> nodes) {
     for (Node node : nodes) {
-      System.out.println(node + "->");
-      for (Node connection: node.getConnections()) {
-        System.out.print(connection + " ");
-      }
+      System.out.print("(" + node + " : " + node.getConnections() + "), ");
     }
+    System.out.println("");
   }
 
   private class Node {
