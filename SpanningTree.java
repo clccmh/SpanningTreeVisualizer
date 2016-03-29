@@ -3,11 +3,16 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Random;
 import java.lang.StringBuilder;
 
 /**
  * @Author Carter Hay 
+ *
+ * TODO: Implement removal of the duplicate paths to the root
+ * Find a good way to draw the tree
  *  
  */
 public class SpanningTree {
@@ -31,7 +36,8 @@ public class SpanningTree {
               } else if (line.matches("[0-9]* ([0-9]*-[0-9]* )*")) {
                 ArrayList<Node> nodes = st.calculateConnections(line);
                 st.findAllRoots(nodes);
-                //removeDuplicateConnections(nodes)
+                st.removeDuplicatePaths(nodes);
+                st.draw(nodes);
               } else {
                 System.out.println("Invalid line");
               }
@@ -50,6 +56,9 @@ public class SpanningTree {
     }
   }
 
+  /**
+   * @param nodes An ArrayList of nodes to calculate the Roots for
+   */
   private void findAllRoots(ArrayList<Node> nodes) {
     draw(nodes);
     String previous = "";
@@ -115,6 +124,19 @@ public class SpanningTree {
     }
   }
 
+  private void removeDuplicatePaths(ArrayList<Node> nodes) {
+    for (Node node : nodes) {
+      //Remove duplicate connections to the same node
+      Set<Node> set = new HashSet<Node>();
+      set.addAll(node.getConnections());
+      node.setConnections(new ArrayList<Node>(set));
+
+      //Remove duplicate paths to the root.
+      //Each node should only have two connections at max and only one with a smaller number of hops.
+    }
+    
+  }
+
   private void draw (ArrayList<Node> nodes) {
     for (Node node : nodes) {
       System.out.print("(" + node + " : " + node.getConnections() + "), ");
@@ -154,6 +176,13 @@ public class SpanningTree {
      */
     public ArrayList<Node> getConnections() {
       return this.connections;
+    }
+
+    /**
+     * @param con The connection list to be set
+     */
+    public void setConnections(ArrayList<Node> con) {
+      this.connections = con;
     }
 
     /**
