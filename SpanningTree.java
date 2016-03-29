@@ -115,7 +115,7 @@ public class SpanningTree {
   private void calculateTree(ArrayList<Node> nodes) {
     ArrayList<Node> temp = new ArrayList<Node>();
     for (Node node : nodes) {
-      temp.add(new Node(node.getMyself(), node.getRoot(), node.getHops(), node.getConnections()));
+      temp.add(new Node(node.getAddress(), node.getRoot(), node.getHops(), node.getConnections()));
     }
     for (Node node : temp) {
       for (Node connection : node.getConnections()) {
@@ -133,33 +133,93 @@ public class SpanningTree {
 
       //Remove duplicate paths to the root.
       //Each node should only have two connections at max and only one with a smaller number of hops.
+      
+      
+      if (node.getConnections().size() > 1) {
+        ArrayList<Node> temp = new ArrayList<Node>();
+        Node currentSmallest = null;
+        for (Node con : node.getConnections()) {
+          if (con.getHops() <= node.getHops()) {
+            if (currentSmallest == null) {
+              currentSmallest = con;
+            } else if (con.getHops() < currentSmallest.getHops()) {
+              currentSmallest = con;
+            } else if (con.getHops() == currentSmallest.getHops() && con.getAddress() < currentSmallest.getAddress()) {
+              currentSmallest = con;
+            }
+          } else {
+            temp.add(con);
+          }
+        }
+        if (currentSmallest != null) {
+          temp.add(currentSmallest);
+        }
+        node.setConnections(temp);
+      }
     }
     
   }
 
   private void draw (ArrayList<Node> nodes) {
+    String[][] grid = new String[nodes.size()*2][nodes.size()*2];
+    ArrayList<Node> drew = new ArrayList<Node>();
+    int nextY = 0;
+    int nextX = 0;
+    grid[nextY][nextX] = nodes.get(0).toString();
+    drew.add(nodes.get(0));
     for (Node node : nodes) {
-      System.out.print("(" + node + " : " + node.getConnections() + "), ");
+      //System.out.print("(" + node + " : " + node.getConnections() + "), ");
+      //grid[node.getHops()*2][node.getAddress()] = node.toString();
+      for (Node con : node.getConnections()) {
+        if (!drew.contains(con)) {
+          if (grid[nextY][nextX+2] == null) {
+            grid[nextY][nextX+1] = "-";
+            grid[nextY][nextX+2] = con.toString();
+            drew.add(con);
+          } else if (grid[nextY+2][nextX+2] == null) {
+            grid[nextY+1][nextX] = "|";
+            grid[nextY+2][nextX] = con.toString();
+            drew.add(con);
+          }
+        }
+      }
+      if (nextY > nextX) {
+        nextX+=2;
+      } else {
+        nextY+=2;
+      }
+      
     }
-    System.out.println("");
+    //System.out.println("");
+    for (int y = 0; y < grid.length; y++) {
+      for (int x = 0; x < grid.length; x++) {
+        if (grid[y][x] == null) {
+          System.out.print("  ");
+        } else {
+          System.out.print(grid[y][x]);
+        }
+      }
+      System.out.println("");
+    }
+    System.out.println("***********************************************************\n");
   }
 
   private class Node {
     private ArrayList<Node> connections;
-    private int myself;
+    private int address;
     private int root;
     private int hops;
 
-    public Node (int myself, int root, int hops, ArrayList<Node> connections) {
+    public Node (int address, int root, int hops, ArrayList<Node> connections) {
       this.connections = connections;
-      this.myself = myself;
+      this.address = address;
       this.root = root;
       this.hops = hops;
     }
 
-    public Node (int myself, int root, int hops) {
+    public Node (int address, int root, int hops) {
       this.connections = new ArrayList<Node>();
-      this.myself = myself;
+      this.address = address;
       this.root = root;
       this.hops = hops;
     }
@@ -169,6 +229,10 @@ public class SpanningTree {
      */
     public void addConnection(Node node) {
       connections.add(node);
+    }
+
+    public void removeConnection(Node node) {
+      connections.remove(node);
     }
 
     /**
@@ -188,8 +252,8 @@ public class SpanningTree {
     /**
      * @return Myself for the node
      */
-    public int getMyself() {
-      return this.myself;
+    public int getAddress() {
+      return this.address;
     }
 
     /**
@@ -210,7 +274,7 @@ public class SpanningTree {
      * @return String that represents the node
      */
     public String toString() {
-      return "[" + this.myself + " " + this.root + " " + this.hops + "]";
+      return "[" + this.address + " " + this.root + " " + this.hops + "]";
     }
 
     /**
