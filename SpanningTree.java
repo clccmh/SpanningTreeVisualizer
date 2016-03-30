@@ -133,8 +133,6 @@ public class SpanningTree {
 
       //Remove duplicate paths to the root.
       //Each node should only have two connections at max and only one with a smaller number of hops.
-      
-      
       if (node.getConnections().size() > 1) {
         ArrayList<Node> temp = new ArrayList<Node>();
         Node currentSmallest = null;
@@ -161,47 +159,54 @@ public class SpanningTree {
   }
 
   private void draw (ArrayList<Node> nodes) {
-    String[][] grid = new String[nodes.size()*2][nodes.size()*2];
+    for (Node node : nodes) {
+      System.out.print("(" + node + " : " + node.getConnections() + "), ");
+    }
+    System.out.println("");
+    /*String[][] grid = new String[nodes.size()*nodes.size()][nodes.size()*nodes.size()];
     ArrayList<Node> drew = new ArrayList<Node>();
-    int nextY = 0;
-    int nextX = 0;
-    grid[nextY][nextX] = nodes.get(0).toString();
+    grid[0][grid[0].length/2] = nodes.get(0).toString();
+    nodes.get(0).setCoords(grid[0].length/2, 0);
     drew.add(nodes.get(0));
     for (Node node : nodes) {
-      //System.out.print("(" + node + " : " + node.getConnections() + "), ");
       //grid[node.getHops()*2][node.getAddress()] = node.toString();
       for (Node con : node.getConnections()) {
         if (!drew.contains(con)) {
-          if (grid[nextY][nextX+2] == null) {
-            grid[nextY][nextX+1] = "-";
-            grid[nextY][nextX+2] = con.toString();
+          if (grid[node.getY()][node.getX()-2] == null) {
+            grid[node.getY()][node.getX()-2] = con.toString();
+            con.setCoords(node.getX()-2, node.getY());
             drew.add(con);
-          } else if (grid[nextY+2][nextX+2] == null) {
-            grid[nextY+1][nextX] = "|";
-            grid[nextY+2][nextX] = con.toString();
+            grid[node.getY()][node.getX()-1] = "-";
+          } else if (grid[node.getY()][node.getX()+2] == null) {
+            grid[node.getY()][node.getX()+2] = con.toString();
+            con.setCoords(node.getX()+2, node.getY());
             drew.add(con);
+            grid[node.getY()][node.getX()+1] = "-";
+          } else if (grid[node.getY()+2][node.getX()] == null) {
+            grid[node.getY()+2][node.getX()] = con.toString();
+            con.setCoords(node.getX(), node.getY()+2);
+            drew.add(con);
+            grid[node.getY()+2][node.getX()] = "|";
           }
         }
       }
-      if (nextY > nextX) {
-        nextX+=2;
-      } else {
-        nextY+=2;
-      }
-      
     }
-    //System.out.println("");
+
+    //Print the grid
     for (int y = 0; y < grid.length; y++) {
-      for (int x = 0; x < grid.length; x++) {
+      Boolean printedData = false;
+      for (int x = 0; x < grid[0].length; x++) {
         if (grid[y][x] == null) {
-          System.out.print("  ");
+          System.out.print(" ");
         } else {
           System.out.print(grid[y][x]);
+          printedData = true;
         }
       }
       System.out.println("");
+      if (!printedData) break;
     }
-    System.out.println("***********************************************************\n");
+    System.out.println("***********************************************************\n");*/
   }
 
   private class Node {
@@ -209,6 +214,8 @@ public class SpanningTree {
     private int address;
     private int root;
     private int hops;
+    private int x;
+    private int y;
 
     public Node (int address, int root, int hops, ArrayList<Node> connections) {
       this.connections = connections;
@@ -224,6 +231,19 @@ public class SpanningTree {
       this.hops = hops;
     }
 
+    public void setCoords (int x, int y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    public int getX() {
+      return this.x;
+    }
+
+    public int getY() {
+      return this.y;
+    }
+
     /**
      * @param node The node to be added to the connections
      */
@@ -231,6 +251,9 @@ public class SpanningTree {
       connections.add(node);
     }
 
+    /**
+     * 
+     */
     public void removeConnection(Node node) {
       connections.remove(node);
     }
