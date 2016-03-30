@@ -7,6 +7,11 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Random;
 import java.lang.StringBuilder;
+import java.awt.Graphics;
+import java.awt.Dimension;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import java.util.Scanner;
 
 /**
  * @Author Carter Hay 
@@ -16,6 +21,8 @@ import java.lang.StringBuilder;
  *  
  */
 public class SpanningTree {
+  
+  JFrame jFrame = new JFrame();
 
   public static void main (String[] args) {
     SpanningTree st = new SpanningTree();
@@ -33,11 +40,17 @@ public class SpanningTree {
                 System.out.println(line);
                 ArrayList<Node> nodes = st.calculateConnections(line);
                 st.findAllRoots(nodes);
+                st.removeDuplicatePaths(nodes);
+                st.draw(nodes);
+                System.out.println("Press any key to continue to the next tree");
+                System.in.read();
               } else if (line.matches("[0-9]* ([0-9]*-[0-9]* )*")) {
                 ArrayList<Node> nodes = st.calculateConnections(line);
                 st.findAllRoots(nodes);
                 st.removeDuplicatePaths(nodes);
                 st.draw(nodes);
+                System.out.println("Press any key to continue to the next tree");
+                System.in.read();
               } else {
                 System.out.println("Invalid line");
               }
@@ -54,20 +67,26 @@ public class SpanningTree {
     } else {
       System.out.println("Usage: java SpanningTree [Filename]");
     }
+    System.exit(0);
   }
 
   /**
    * @param nodes An ArrayList of nodes to calculate the Roots for
    */
   private void findAllRoots(ArrayList<Node> nodes) {
-    draw(nodes);
     String previous = "";
     for (int i = 0; i < nodes.size(); i++) {
+      draw(nodes);
+      System.out.println("Please type n to see the next step, or q to quit.");
+      Scanner in = new Scanner(System.in);
+      String choice = in.nextLine();
+      if (choice.compareToIgnoreCase("q") == 0) {
+        System.exit(0);
+      }
       this.calculateTree(nodes);
       if (previous.equals(nodes.toString())) {
         break;
       }
-      draw(nodes);
       previous = nodes.toString();
     }
   }
@@ -159,54 +178,15 @@ public class SpanningTree {
   }
 
   private void draw (ArrayList<Node> nodes) {
-    for (Node node : nodes) {
-      System.out.print("(" + node + " : " + node.getConnections() + "), ");
-    }
-    System.out.println("");
-    /*String[][] grid = new String[nodes.size()*nodes.size()][nodes.size()*nodes.size()];
-    ArrayList<Node> drew = new ArrayList<Node>();
-    grid[0][grid[0].length/2] = nodes.get(0).toString();
-    nodes.get(0).setCoords(grid[0].length/2, 0);
-    drew.add(nodes.get(0));
-    for (Node node : nodes) {
-      //grid[node.getHops()*2][node.getAddress()] = node.toString();
-      for (Node con : node.getConnections()) {
-        if (!drew.contains(con)) {
-          if (grid[node.getY()][node.getX()-2] == null) {
-            grid[node.getY()][node.getX()-2] = con.toString();
-            con.setCoords(node.getX()-2, node.getY());
-            drew.add(con);
-            grid[node.getY()][node.getX()-1] = "-";
-          } else if (grid[node.getY()][node.getX()+2] == null) {
-            grid[node.getY()][node.getX()+2] = con.toString();
-            con.setCoords(node.getX()+2, node.getY());
-            drew.add(con);
-            grid[node.getY()][node.getX()+1] = "-";
-          } else if (grid[node.getY()+2][node.getX()] == null) {
-            grid[node.getY()+2][node.getX()] = con.toString();
-            con.setCoords(node.getX(), node.getY()+2);
-            drew.add(con);
-            grid[node.getY()+2][node.getX()] = "|";
-          }
-        }
-      }
-    }
-
-    //Print the grid
-    for (int y = 0; y < grid.length; y++) {
-      Boolean printedData = false;
-      for (int x = 0; x < grid[0].length; x++) {
-        if (grid[y][x] == null) {
-          System.out.print(" ");
-        } else {
-          System.out.print(grid[y][x]);
-          printedData = true;
-        }
-      }
-      System.out.println("");
-      if (!printedData) break;
-    }
-    System.out.println("***********************************************************\n");*/
+    jFrame.dispose();
+    jFrame = new JFrame();
+    jFrame.add(new drawingBoard(nodes));
+    jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    jFrame.setAlwaysOnTop(true);
+    jFrame.setFocusableWindowState(false);
+    jFrame.setSize(500, 500);
+    jFrame.setVisible(true);
+    
   }
 
   private class Node {
@@ -308,6 +288,48 @@ public class SpanningTree {
         this.root = node.getRoot();
         this.hops = node.getHops() + 1;
       }
+    }
+  }
+  
+  private class drawingBoard extends JPanel {
+    private ArrayList<Node> nodes;
+
+    public drawingBoard(ArrayList<Node> nodes) {
+      this.nodes = nodes;
+    }
+
+    public void paintComponent (Graphics g) {
+      int rectWidth = 50;
+      int rectHeight = 50;
+      int rectX = (int)(super.getSize().getWidth()/2)-(rectWidth/2);
+      int rectY = 10;
+      int prevX = rectX;
+      int prevY = rectY;
+      int num = 0;
+      ArrayList<Node> alreadyLined = new ArrayList<Node>();
+
+      for (Node node : nodes) {
+        node.setCoords(prevX, prevY);
+        g.drawRect(prevX, prevY, rectWidth, rectHeight);
+        g.drawString(node.toString(), prevX+5, prevY+(rectHeight/2)+5);
+        if (num % 3 == 0) {
+          prevX = rectX-rectWidth;
+          prevY = prevY+rectHeight*2*((num/3)+1);
+        } else if (num % 3 == 1) {
+          prevX = prevX+(rectWidth*2);
+        } else if (num % 3 == 2) {
+          prevX = prevX-rectWidth;
+          prevY = prevY+rectHeight*2;
+        }
+        num++;
+      }
+
+      for (Node node : nodes) {
+        for (Node con : node.getConnections()) {
+          g.drawLine(node.getX()+rectWidth/2, node.getY()+rectHeight/2, con.getX()+rectWidth/2, con.getY()+rectHeight/2);
+        }
+      }
+
     }
   }
 
