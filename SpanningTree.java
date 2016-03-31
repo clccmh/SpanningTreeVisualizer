@@ -41,6 +41,7 @@ public class SpanningTree {
                 line = st.calculateRandomConnections(line);
                 System.out.println(line);
                 ArrayList<Node> nodes = st.calculateConnections(line);
+                System.out.println(st.containsOrphan(nodes));
                 st.findAllRoots(nodes);
                 st.removeDuplicatePaths(nodes);
                 st.draw(nodes);
@@ -128,6 +129,44 @@ public class SpanningTree {
       nodes.get(Integer.parseInt(connect[1])-1).addConnection(nodes.get(Integer.parseInt(connect[0])-1));
     }
     return nodes;
+  }
+
+  /**
+   * Determines if an arraylist representing a spanning tree contains 
+   * any sections that are orphaned from the rest
+   *
+   * @return Whether or not a tree contains orphanned sections
+   */
+  private boolean containsOrphan(ArrayList<Node> nodes) {
+    for (Node node : nodes) {
+      for (Node node2 : nodes) {
+        if (node2 != node) {
+          if (!canReachNode(node2, node, new ArrayList<Node>())) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Recursive helper method to dertermine if a node can reach another node
+   *
+   * @return Whether or not a node can reach another node
+   */
+  private boolean canReachNode(Node current, Node toReach, ArrayList<Node> alreadyChecked) {
+    for (Node con : current.getConnections()) {
+      if (con == toReach) {
+        return true;
+      } else if (!alreadyChecked.contains(con)) {
+        alreadyChecked.add(con);
+        return canReachNode(con, toReach, alreadyChecked);
+      } else {
+        return false;
+      }
+    }
+    return false;
   }
 
   /**
