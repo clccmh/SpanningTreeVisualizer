@@ -16,8 +16,10 @@ import java.util.Scanner;
 /**
  * @author Carter Hay 
  *
- * TODO: Implement removal of the duplicate paths to the root
- * Find a good way to draw the tree
+ * TODO: Fix the random connection to insure no node is abandoned
+ *       Code commenting
+ *       Code review
+ *       Code cleanup
  *  
  */
 public class SpanningTree {
@@ -172,6 +174,15 @@ public class SpanningTree {
           temp.add(currentSmallest);
         }
         node.setConnections(temp);
+      }
+    }
+
+    // This is needed to make sure one connection does not exist where the reciprocal is removed
+    for (Node node : nodes) {
+      for (Node con : node.getConnections()) {
+        if (!con.getConnections().contains(node)) {
+          node.removeConnection(con);
+        }
       }
     }
     
