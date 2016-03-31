@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 import java.util.Scanner;
 
 /**
- * @Author Carter Hay 
+ * @author Carter Hay 
  *
  * TODO: Implement removal of the duplicate paths to the root
  * Find a good way to draw the tree
@@ -178,13 +178,20 @@ public class SpanningTree {
   }
 
   private void draw (ArrayList<Node> nodes) {
+    for (Node node : nodes) {
+      System.out.print("\t" + node + ": ");
+      for (Node con : node.getConnections()) {
+        System.out.print(con + ", ");
+      }
+      System.out.println("");
+    }
     jFrame.dispose();
     jFrame = new JFrame();
-    jFrame.add(new drawingBoard(nodes));
     jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     jFrame.setAlwaysOnTop(true);
     jFrame.setFocusableWindowState(false);
     jFrame.setSize(500, 500);
+    jFrame.add(new drawingBoard(nodes));
     jFrame.setVisible(true);
     
   }
@@ -306,8 +313,8 @@ public class SpanningTree {
       int prevX = rectX;
       int prevY = rectY;
       int num = 0;
-      ArrayList<Node> alreadyLined = new ArrayList<Node>();
 
+      // Loop through all of the nodes and draw the boxes and strings
       for (Node node : nodes) {
         node.setCoords(prevX, prevY);
         g.drawRect(prevX, prevY, rectWidth, rectHeight);
@@ -324,9 +331,41 @@ public class SpanningTree {
         num++;
       }
 
+      // Loop through all of the nodes and draw the lines
       for (Node node : nodes) {
+        ArrayList<int[]> lines = new ArrayList<int[]>();
+        int nodeX = node.getX()+rectWidth/2;
+        int nodeY = node.getY()+rectHeight/2;
+        // Create a line between every connection and the node
         for (Node con : node.getConnections()) {
-          g.drawLine(node.getX()+rectWidth/2, node.getY()+rectHeight/2, con.getX()+rectWidth/2, con.getY()+rectHeight/2);
+          int[] line = new int[4];
+          line[0] = nodeX;
+          line[1] = nodeY;
+          line[2] = con.getX()+rectWidth/2;
+          line[3] = con.getY()+rectHeight/2;
+          lines.add(line);
+        }
+
+        // For each line, move it over by five if there is more than one line
+        for (int[] line : lines) {
+          int inc = 5;
+          for (int[] ln : lines) {
+            if (line != ln) {
+              if (line[2] == ln[2] && line[3] == ln[3]) {
+                ln[2] += inc;
+                ln[0] += inc;
+                if (inc > 0) {
+                  inc = inc * -1;
+                } else {
+                  inc = inc * -2;
+                }
+              }
+            }
+          }
+        }
+        // Draw all of the lines
+        for (int[] line : lines) {
+          g.drawLine(line[0], line[1], line[2], line[3]);
         }
       }
 
