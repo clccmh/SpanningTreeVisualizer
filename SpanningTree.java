@@ -24,7 +24,6 @@ import java.util.Scanner;
  * TODO: Code commenting
  *       Code review
  *       Code cleanup
- *       Random will not work for double digit numbers. Fix that.
  *
  */
 public class SpanningTree {
@@ -47,6 +46,7 @@ public class SpanningTree {
                 boolean invalid = true;
                 while (invalid) {
                   line = st.generateRandomConnections(line);
+                  System.out.println(line);
                   nodes = st.calculateConnections(line);
                   invalid = st.containsOrphan(nodes);
                 }
@@ -115,8 +115,9 @@ public class SpanningTree {
   private String generateRandomConnections (String line) {
     StringBuilder sb = new StringBuilder();
     Random rand = new Random();
-    int numOfNodes = Character.getNumericValue(line.charAt(0));
-    sb.append(line.charAt(0) + " ");
+    int numOfNodes = Integer.parseInt(line.split(" ")[0]);
+    System.out.println("numOfNodes: " + numOfNodes);
+    sb.append(line.split(" ")[0] + " ");
     for (int i = 1; i <= numOfNodes; i++) {
       int con = rand.nextInt(numOfNodes)+1;
       if (i == con && con < numOfNodes) {
@@ -125,7 +126,7 @@ public class SpanningTree {
         con--;
       }
       sb.append(i + "-" + con + " ");
-    .}
+    }
     return sb.toString();
   }
 
@@ -402,12 +403,12 @@ public class SpanningTree {
         g.drawString(node.toString(), prevX+5, prevY+(rectHeight/2)+5);
         if (num % 3 == 0) {
           prevX = rectX-rectWidth;
-          prevY = prevY+rectHeight*2*((num/3)+1);
+          prevY = prevY+(rectHeight*2);
         } else if (num % 3 == 1) {
           prevX = prevX+(rectWidth*2);
         } else if (num % 3 == 2) {
           prevX = prevX-rectWidth;
-          prevY = prevY+rectHeight*2;
+          prevY = prevY+(rectHeight*2);
         }
         num++;
       }
