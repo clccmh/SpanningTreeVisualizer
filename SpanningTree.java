@@ -24,7 +24,8 @@ import java.util.Scanner;
  * TODO: Code commenting
  *       Code review
  *       Code cleanup
- *  
+ *       Random will not work for double digit numbers. Fix that.
+ *
  */
 public class SpanningTree {
   
@@ -55,10 +56,10 @@ public class SpanningTree {
                 if (!st.containsOrphan(nodes)) {
                   st.handleTree(nodes);
                 } else {
-                  System.out.println("Invalid line: Part of the tree is not attatched");
+                  System.out.println("Invalid line: Part of the tree is not attatched.");
                 }
               } else {
-                System.out.println("Invalid line: Invalid format");
+                System.out.println("Invalid line: Invalid format.");
               }
             }
           } catch (Exception e) {
@@ -80,7 +81,7 @@ public class SpanningTree {
     this.findAllRoots(nodes);
     this.removeCycles(nodes);
     this.draw(nodes);
-    System.out.println("Press any key to continue to the next tree");
+    System.out.println("Press any key to continue to the next tree.");
     try {
       System.in.read();
     } catch (IOException e) {
@@ -124,7 +125,7 @@ public class SpanningTree {
         con--;
       }
       sb.append(i + "-" + con + " ");
-    }
+    .}
     return sb.toString();
   }
 
