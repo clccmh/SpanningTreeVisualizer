@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
@@ -14,10 +15,13 @@ import javax.swing.JPanel;
 import java.util.Scanner;
 
 /**
- * @author Carter Hay 
+ * This program implements a SpanningTree as learned in Csci4311 and pertaining to 
+ * networking connections between hubs. 
  *
- * TODO: Fix the random connection to insure no node is abandoned
- *       Code commenting
+ * @author Carter Hay 
+ * @version 1.0
+ *
+ * TODO: Code commenting
  *       Code review
  *       Code cleanup
  *  
@@ -38,24 +42,23 @@ public class SpanningTree {
             while ((line = br.readLine()) != null) {
               System.out.println(line);
               if (line.matches("[0-9]* R")) {
-                line = st.calculateRandomConnections(line);
-                System.out.println(line);
-                ArrayList<Node> nodes = st.calculateConnections(line);
-                System.out.println(st.containsOrphan(nodes));
-                st.findAllRoots(nodes);
-                st.removeDuplicatePaths(nodes);
-                st.draw(nodes);
-                System.out.println("Press any key to continue to the next tree");
-                System.in.read();
+                ArrayList<Node> nodes = null;
+                boolean invalid = true;
+                while (invalid) {
+                  line = st.generateRandomConnections(line);
+                  nodes = st.calculateConnections(line);
+                  invalid = st.containsOrphan(nodes);
+                }
+                st.handleTree(nodes);
               } else if (line.matches("[0-9]* ([0-9]*-[0-9]* )*")) {
                 ArrayList<Node> nodes = st.calculateConnections(line);
-                st.findAllRoots(nodes);
-                st.removeDuplicatePaths(nodes);
-                st.draw(nodes);
-                System.out.println("Press any key to continue to the next tree");
-                System.in.read();
+                if (!st.containsOrphan(nodes)) {
+                  st.handleTree(nodes);
+                } else {
+                  System.out.println("Invalid line: Part of the tree is not attatched");
+                }
               } else {
-                System.out.println("Invalid line");
+                System.out.println("Invalid line: Invalid format");
               }
             }
           } catch (Exception e) {
@@ -71,6 +74,17 @@ public class SpanningTree {
       System.out.println("Usage: java SpanningTree [Filename]");
     }
     System.exit(0);
+  }
+
+  private void handleTree(ArrayList<Node> nodes) {
+    this.findAllRoots(nodes);
+    this.removeCycles(nodes);
+    this.draw(nodes);
+    System.out.println("Press any key to continue to the next tree");
+    try {
+      System.in.read();
+    } catch (IOException e) {
+    }
   }
 
   /**
@@ -97,7 +111,7 @@ public class SpanningTree {
   /**
    * @param line The line to be calculated
    */
-  private String calculateRandomConnections (String line) {
+  private String generateRandomConnections (String line) {
     StringBuilder sb = new StringBuilder();
     Random rand = new Random();
     int numOfNodes = Character.getNumericValue(line.charAt(0));
@@ -136,18 +150,19 @@ public class SpanningTree {
    * any sections that are orphaned from the rest
    *
    * @return Whether or not a tree contains orphanned sections
+   * @see canReachNode
    */
-  private boolean containsOrphan(ArrayList<Node> nodes) {
+  private boolean containsOrphan (ArrayList<Node> nodes) {
     for (Node node : nodes) {
       for (Node node2 : nodes) {
         if (node2 != node) {
           if (!canReachNode(node2, node, new ArrayList<Node>())) {
-            return false;
+            return true;
           }
         }
       }
     }
-    return true;
+    return false;
   }
 
   /**
@@ -155,24 +170,23 @@ public class SpanningTree {
    *
    * @return Whether or not a node can reach another node
    */
-  private boolean canReachNode(Node current, Node toReach, ArrayList<Node> alreadyChecked) {
+  private boolean canReachNode (Node current, Node toReach, ArrayList<Node> alreadyChecked) {
+    alreadyChecked.add(current);
+    boolean reached = false;
     for (Node con : current.getConnections()) {
       if (con == toReach) {
         return true;
       } else if (!alreadyChecked.contains(con)) {
-        alreadyChecked.add(con);
-        return canReachNode(con, toReach, alreadyChecked);
-      } else {
-        return false;
+        reached = reached | canReachNode(con, toReach, alreadyChecked);
       }
     }
-    return false;
+    return reached;
   }
 
   /**
    * @param nodes The nodes to calculate the tree for
    */
-  private void calculateTree(ArrayList<Node> nodes) {
+  private void calculateTree (ArrayList<Node> nodes) {
     ArrayList<Node> temp = new ArrayList<Node>();
     for (Node node : nodes) {
       temp.add(new Node(node.getAddress(), node.getRoot(), node.getHops(), node.getConnections()));
@@ -184,7 +198,12 @@ public class SpanningTree {
     }
   }
 
-  private void removeDuplicatePaths(ArrayList<Node> nodes) {
+  /**
+   * Removes all cycles from the tree
+   *
+   * @param nodes The nodes that make up the tree
+   */
+  private void removeCycles(ArrayList<Node> nodes) {
     for (Node node : nodes) {
       //Remove duplicate connections to the same node
       Set<Node> set = new HashSet<Node>();
@@ -227,6 +246,12 @@ public class SpanningTree {
     
   }
 
+  /**
+   * Draws the tree
+   *
+   * @param nodes The nodes that make up the tree.
+   * @see drawingBoard
+   */
   private void draw (ArrayList<Node> nodes) {
     for (Node node : nodes) {
       System.out.print("\t" + node + ": ");
@@ -346,15 +371,20 @@ public class SpanningTree {
         this.hops = node.getHops() + 1;
       }
     }
+
   }
   
+  /**
+   * This handles the pop up gui that draws the tree.
+   */
   private class drawingBoard extends JPanel {
     private ArrayList<Node> nodes;
 
-    public drawingBoard(ArrayList<Node> nodes) {
+    public drawingBoard (ArrayList<Node> nodes) {
       this.nodes = nodes;
     }
 
+    @Override
     public void paintComponent (Graphics g) {
       int rectWidth = 50;
       int rectHeight = 50;
