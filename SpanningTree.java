@@ -21,9 +21,7 @@ import java.util.Scanner;
  * @author Carter Hay 
  * @version 1.0
  *
- * TODO: Code commenting
- *       Code review
- *       Code cleanup
+ * TODO: Code review
  *
  */
 public class SpanningTree {
@@ -77,6 +75,12 @@ public class SpanningTree {
     System.exit(0);
   }
 
+  /**
+   * This is the method that is responsible for handling the tree, 
+   * and calculating it step by step.
+   *
+   * @param nodes The nodes that make up the tree.
+   */
   private void handleTree(ArrayList<Node> nodes) {
     this.findAllRoots(nodes);
     this.removeCycles(nodes);
@@ -89,6 +93,8 @@ public class SpanningTree {
   }
 
   /**
+   * Calculates the roots for every node in the tree.
+   *
    * @param nodes An ArrayList of nodes to calculate the Roots for
    */
   private void findAllRoots(ArrayList<Node> nodes) {
@@ -110,7 +116,10 @@ public class SpanningTree {
   }
 
   /**
+   * Generates a string representing random connections between nodes
+   *
    * @param line The line to be calculated
+   * @return String representing random connections between nodes
    */
   private String generateRandomConnections (String line) {
     StringBuilder sb = new StringBuilder();
@@ -131,7 +140,10 @@ public class SpanningTree {
   }
 
   /**
+   * Calculates the nodes from a string representing the connections
+   *
    * @param line The line to be calculated
+   * @return An ArrayList of nodes in the tree.
    */
   private ArrayList<Node> calculateConnections (String line) {
     String[] splitLine = line.split(" ");
@@ -273,6 +285,9 @@ public class SpanningTree {
     
   }
 
+  /**
+   * 
+   */
   private class Node {
     private ArrayList<Node> connections;
     private int address;
@@ -295,15 +310,27 @@ public class SpanningTree {
       this.hops = hops;
     }
 
+    /**
+     * Sets the coordinates of the node
+     *
+     * @param x The x coordinate
+     * @param y The y coordinate
+     */
     public void setCoords (int x, int y) {
       this.x = x;
       this.y = y;
     }
 
+    /**
+     * @return The x coordinate of the node
+     */
     public int getX() {
       return this.x;
     }
 
+    /**
+     * @return The y coordinate of the node
+     */
     public int getY() {
       return this.y;
     }
@@ -316,7 +343,9 @@ public class SpanningTree {
     }
 
     /**
-     * 
+     * Removes a connection
+     *
+     * @param node The node to remove from the connections
      */
     public void removeConnection(Node node) {
       connections.remove(node);
