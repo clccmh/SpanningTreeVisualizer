@@ -21,8 +21,6 @@ import java.util.Scanner;
  * @author Carter Hay 
  * @version 1.0
  *
- * TODO: Code review
- *
  */
 public class SpanningTree {
   
